@@ -4,12 +4,11 @@ from pyspark.sql.functions import col, avg
 # Crear sesión de Spark
 spark = SparkSession.builder \
     .appName("MovieLensAnalysis") \
-    .master("spark://spark-master:7077") \
     .getOrCreate()
 
 # Cargar los datos de MovieLens (asegúrate de que la ruta sea correcta)
-ratings = spark.read.csv("ratings.csv", header=True, inferSchema=True)
-movies = spark.read.csv("movies.csv", header=True, inferSchema=True)
+ratings = spark.read.csv("/tmp/app/ratings.csv", header=True, inferSchema=True)
+movies = spark.read.csv("/tmp/app/movies.csv", header=True, inferSchema=True)
 
 # Calcular el promedio de calificaciones por película
 average_ratings = ratings.groupBy("movieId").agg(avg("rating").alias("avg_rating"))
@@ -21,7 +20,7 @@ movie_avg_ratings = average_ratings.join(movies, on="movieId", how="inner")
 movie_avg_ratings.orderBy(col("avg_rating").desc()).show(10)
 
 # Guardar los resultados en un archivo CSV
-movie_avg_ratings.write.csv("/app/output/movie_ratings")
+movie_avg_ratings.write.csv("/tmp/app/output/movie_ratings")
 
 # Detener la sesión de Spark
 spark.stop()
